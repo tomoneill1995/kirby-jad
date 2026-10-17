@@ -12,6 +12,8 @@ else sees it.
 
 ![Dreamland caves](docs/dreamland.png)
 
+![Gordo](docs/gordo.png)
+
 ## Installing
 
 Grab `kirby-jad-*.jar` from [Releases](../../releases) and sideload it with your preferred method.
