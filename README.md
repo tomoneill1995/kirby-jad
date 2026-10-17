@@ -16,6 +16,8 @@ else sees it.
 
 ![Gordo](docs/gordo-spikes.png)
 
+*Looks better in game, the screenshots don't do it justice.*
+
 ## Installing
 
 Grab `kirby-jad-*.jar` from [Releases](../../releases) and sideload it with your preferred method.
