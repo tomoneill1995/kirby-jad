@@ -1,0 +1,5 @@
+build/
+.gradle/
+# machine specific (points gradle at a local jdk)
+gradle.properties
+*.log

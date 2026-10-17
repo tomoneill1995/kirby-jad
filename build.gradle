@@ -1,0 +1,87 @@
+plugins {
+	id 'java'
+	id 'checkstyle'
+}
+
+repositories {
+	mavenLocal()
+	maven {
+		url = 'https://repo.runelite.net'
+	}
+	mavenCentral()
+}
+
+// Builds against the locally built fork (CursorRepos/runelite), same as pvpsim/plugin, so the
+// plugin and the client it runs in are always the same API version. Rebuild the client with
+// `./gradlew :client:publishToMavenLocal` in that repo after pulling, then rebuild this.
+def runeliteDir = project.findProperty('runeliteDir') ?: 'C:/Users/User/Desktop/CursorRepos/runelite'
+def runeliteVersion = project.findProperty('runeliteVersion') ?: '1.13.2-SNAPSHOT'
+
+def clientShadedJar = file("${runeliteDir}/runelite-client/build/libs/client-${runeliteVersion}-shaded.jar")
+def apiJar = file("${runeliteDir}/runelite-api/build/libs/runelite-api-${runeliteVersion}.jar")
+def cacheJar = file("${runeliteDir}/cache/build/libs/cache-${runeliteVersion}.jar")
+
+[clientShadedJar, apiJar].each {
+	if (!it.exists()) {
+		logger.warn("WARNING: ${it} not found - build the client first: " +
+				"cd ${runeliteDir} && ./gradlew :client:publishToMavenLocal")
+	}
+}
+
+dependencies {
+	compileOnly files(clientShadedJar, apiJar)
+	compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+	testImplementation files(clientShadedJar, apiJar, cacheJar)
+	testImplementation 'org.apache.commons:commons-compress:1.21'
+	testImplementation 'junit:junit:4.13.2'
+	testCompileOnly 'org.projectlombok:lombok:1.18.30'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+}
+
+group = 'com.kirbyjad'
+version = '0.1.0'
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+// Launches the locally built client with this plugin loaded (run-test.bat calls this).
+task runPlugin(type: JavaExec) {
+	description = 'Run the locally built RuneLite client with the Kirby Jad plugin loaded'
+	classpath = sourceSets.test.runtimeClasspath + sourceSets.main.output
+	mainClass = 'com.kirbyjad.KirbyJadPluginTest'
+	systemProperty 'java.awt.headless', 'false'
+	jvmArgs = ['-ea', '-Xms512m', '-Xmx2048m']
+}
+
+// Renders the models to PNG contact sheets offline (no client, no login) - render-preview.bat.
+task renderPreview(type: JavaExec) {
+	description = 'Render Kirby and Waddle Dee animation frames to build/preview/*.png'
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'com.kirbyjad.PreviewRenderer'
+	args = [file("${buildDir}/preview").absolutePath]
+}
+
+// Prints facts about the real Jad/healer models from the local game cache (scale, winding).
+task probeCache(type: JavaExec) {
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'com.kirbyjad.CacheProbe'
+}
+
+// same rules as runelite itself
+checkstyle {
+	toolVersion = '9.3'
+	configFile = file("${runeliteDir}/config/checkstyle/checkstyle.xml")
+	configDirectory = file("${runeliteDir}/config/checkstyle")
+	ignoreFailures = false
+}
+
+// dumps the fight caves floor colours/textures from the cache
+task probeCave(type: JavaExec) {
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'com.kirbyjad.CaveProbe'
+}
