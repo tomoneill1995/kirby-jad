@@ -10,9 +10,9 @@ else sees it.
 - **Dreamland caves**: grass, water, hedges, hills, mesas, Whispy Woods, butterflies and a rainbow
 - **Colour brightness** slider for normal screens and recordings
 
-![Dreamland caves](docs/dreamland.png)
+![Dreamland caves](docs/dreamland-wave.png)
 
-![Gordo](docs/gordo.png)
+![Gordo](docs/gordo-spikes.png)
 
 ## Installing
 
